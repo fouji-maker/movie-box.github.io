@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Download App - User</title>
+    <style>
+        body { 
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0; 
+            padding: 0; 
+            background-color: #e9ebee;
+            color: #1c1d21;
+        }
+        .container { 
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px; 
+        }
+        h1#main-app-title { 
+            /* This title is present in HTML for semantics but hidden by default for this UI */
+            display: none; 
+        }
+        
+        #search-bar-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        #search-input {
+            padding: 10px 12px;
+            flex-grow: 1; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        #search-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 1px rgba(0,123,255,.25);
+            outline: none;
+        }
+        #search-button, #clear-search-button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        #search-button:hover { background-color: #0056b3;}
+        #clear-search-button { background-color: #6c757d;}
+        #clear-search-button:hover { background-color: #545b62;}
+
+        .section-header {
+            background-color: #f0f2f5;
+            padding: 10px 15px;
+            margin: 20px -10px 10px -10px; /* Adjust based on container padding */
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #4b4f56;
+            font-weight: 500;
+        }
+        .section-header .fire-emoji {
+            color: orange;
+        }
+
+        .movie-list-new {
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .movie-item {
+            display: flex;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: flex-start;
+        }
+        .movie-item:last-child {
+            border-bottom: none;
+        }
+        .movie-poster-new {
+            width: 70px;
+            height: 100px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .movie-poster-new img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+        .movie-details-new {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .movie-title-new {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0560A5;
+            margin: 0 0 5px 0;
+            line-height: 1.3;
+        }
+        .movie-title-new a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .movie-title-new a:hover {
+            text-decoration: underline;
+        }
+        .movie-tags-new {
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border-radius: 10px;
+            margin-right: 5px;
+            margin-bottom: 3px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        .tag-green { background-color: #28a745; }
+        .tag-blue { background-color: #007bff; }
+        .tag-orange { background-color: #fd7e14; }
+        .tag-red { background-color: #dc3545; }
+        .tag-grey { background-color: #6c757d; }
+        
+        .movie-download-link-new {
+            font-size: 0.85rem;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 0;
+        }
+        .movie-download-link-new.disabled-link {
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            text-decoration: none;
+        }
+        .movie-download-link-new:not(.disabled-link):hover {
+            text-decoration: underline;
+        }
+        .loading, .no-movies { 
+            text-align: center; font-size: 1.1em; color: #606770;
+            width: 100%; padding: 25px 15px;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 5px; }
+            .section-header { margin: 15px -5px 10px -5px; padding: 8px 10px; }
+            .section-header h2 { font-size: 1.1rem; }
+            .movie-poster-new { width: 60px; height: 90px; margin-right: 10px; }
+            .movie-title-new { font-size: 0.95rem; }
+            .tag { font-size: 0.65rem; padding: 2px 6px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- This h1 is present in HTML but hidden by CSS for this specific UI -->
+        <h1 id="main-app-title">Available Movies</h1>
+
+        <div id="search-bar-container">
+            <input type="text" id="search-input" placeholder="Search movies by title...">
+            <button id="search-button">Search</button>
+            <button id="clear-search-button" style="display:none;">Clear</button>
+        </div>
+        
+        <div id="movie-list-container">
+            <!-- Movie sections and items will be injected here by JavaScript -->
+            <p class="loading">Loading movies...</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyC0_97BjShgPZ4Yguv6ddSIqc_ZzZSQdP4", 
+          authDomain: "movies-62166.firebaseapp.com",
+          databaseURL: "https://movies-62166-default-rtdb.firebaseio.com",
+          projectId: "movies-62166",
+          storageBucket: "movies-62166.firebasestorage.app",
+          messagingSenderId: "745470509408",
+          appId: "1:745470509408:web:9177baa1f2647a36eade05",
+          measurementId: "G-CGGV6ZMSJW"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const moviesRef = database.ref('filmyfly-movies');
+
+        const movieListContainer = document.getElementById('movie-list-container');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const clearSearchButton = document.getElementById('clear-search-button');
+
+        let allMoviesData = {};
+        let currentFilterTerm = "";
+
+        function handleDownloadClick(movieUrl, movieTitle) {
+            console.log(`Download initiated for: ${movieTitle} (URL: ${movieUrl})`);
+            if (movieUrl === "#" || !movieUrl) {
+                alert("Sorry, the download link for this movie is not available.");
+                return false; 
+            }
+            setTimeout(() => {
+                window.open(movieUrl, '_blank'); 
+            }, 500); 
+            return false; 
+        }
+
+        function renderMovies(moviesToRender) {
+            movieListContainer.innerHTML = ''; 
+            if (Object.keys(moviesToRender).length === 0) {
+                let message = currentFilterTerm ? 
+                    `<p class="no-movies">No movies found matching "${currentFilterTerm}".</p>` :
+                    '<p class="no-movies">No movies available at the moment. Check back later!</p>';
+                movieListContainer.innerHTML = message;
+                return;
+            }
+            
+            const latestSectionDiv = document.createElement('div');
+            latestSectionDiv.className = 'section-latest-movies'; 
+
+            const sectionHeader = document.createElement('div');
+            sectionHeader.className = 'section-header';
+            sectionHeader.innerHTML = `<h2><span class="fire-emoji">🔥</span> Latest Movies <span class="fire-emoji">🔥</span></h2>`;
+            latestSectionDiv.appendChild(sectionHeader);
+
+            const movieListDiv = document.createElement('div'); 
+            movieListDiv.className = 'movie-list-new'; 
+            latestSectionDiv.appendChild(movieListDiv);
+            
+            movieListContainer.appendChild(latestSectionDiv);
+
+            const sortedMovieIds = Object.keys(moviesToRender).sort((a, b) => (moviesToRender[b].addedAt || 0) - (moviesToRender[a].addedAt || 0) );
+
+            sortedMovieIds.forEach(movieId => {
+                const movie = moviesToRender[movieId];
+                const title = movie.title || "No Title";
+                const posterUrl = movie.posterUrl || "https://via.placeholder.com/70x100.png?text=N/A";
+                const downloadLink = movie.downloadLink || "#";
+                const escapedTitle = title.replace(/'/g, "\\'").replace(/"/g, '"');
+                const year = movie.release_date ? `(${movie.release_date.substring(0,4)})` : '(N/A)';
+                const additionalTitleInfo = movie.extraInfo || ""; 
+                let tagsHtml = '';
+                if (movie.tags && Array.isArray(movie.tags)) { 
+                    movie.tags.forEach(tag => {
+                        tagsHtml += `<span class="tag tag-${tag.color || 'grey'}">${tag.text}</span> `;
+                    });
+                } else { 
+                    tagsHtml = `<span class="tag tag-green">New Movie ${year.replace(/[()]/g,'')}</span>`;
+                }
+
+                const movieItemHTML = `
+                    <div class="movie-item">
+                        <div class="movie-poster-new">
+                            <img src="${posterUrl}" alt="${title} Poster" onerror="this.onerror=null;this.src='https://via.placeholder.com/70x100.png?text=Error';">
+                        </div>
+                        <div class="movie-details-new">
+                            <h3 class="movie-title-new">${title} ${year} ${additionalTitleInfo}</h3>
+                            <div class="movie-tags-new">
+                                ${tagsHtml}
+                            </div>
+                            <a href="#" onclick="return handleDownloadClick('${downloadLink}', '${escapedTitle}');" 
+                               class="movie-download-link-new ${!downloadLink || downloadLink === '#' ? 'disabled-link' : ''}"
+                               title="${!downloadLink || downloadLink === '#' ? 'Download link not available' : 'Download ' + title}">
+                                Download Movie
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = movieItemHTML.trim();
+                const newMovieItemElement = tempDiv.firstChild;
+                if(newMovieItemElement) {
+                    movieListDiv.appendChild(newMovieItemElement);
+                }
+            });
+        }
+
+        function performSearch() { 
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            currentFilterTerm = searchTerm; 
+            if (!searchTerm) { renderMovies(allMoviesData); clearSearchButton.style.display = 'none'; return; }
+            const filteredMovies = {};
+            for (const movieId in allMoviesData) {
+                if (allMoviesData[movieId].title && allMoviesData[movieId].title.toLowerCase().includes(searchTerm)) {
+                    filteredMovies[movieId] = allMoviesData[movieId];
+                }
+            }
+            renderMovies(filteredMovies);
+            clearSearchButton.style.display = 'inline-block'; 
+        }
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
+        searchInput.addEventListener('input', () => { /* For potential future use like instant search */ });
+        clearSearchButton.addEventListener('click', () => {
+            searchInput.value = ''; currentFilterTerm = ""; renderMovies(allMoviesData); clearSearchButton.style.display = 'none'; 
+        });
+
+        function fetchAndDisplayMovies() {
+            movieListContainer.innerHTML = '<p class="loading">Loading movies...</p>';
+            moviesRef.orderByChild('addedAt').on('value', snapshot => {
+                if (snapshot.exists()) {
+                    allMoviesData = snapshot.val();
+                    if (currentFilterTerm) { performSearch(); } 
+                    else { renderMovies(allMoviesData); }
+                } else {
+                    allMoviesData = {}; renderMovies(allMoviesData);
+                }
+            }, error => {
+                console.error("Error fetching movies: ", error);
+                movieListContainer.innerHTML = '<p class="no-movies">Error loading movies. Please try again later.</p>';
+            });
+        }
+        fetchAndDisplayMovies();
+    </script>
+
+    <script type='text/javascript' src='//pl26414747.profitableratecpm.com/9b/0f/f8/9b0ff84fef14c6caf2cded133f6abf07.js'></script>
+    
+</body>
+</html>
